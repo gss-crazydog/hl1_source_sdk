@@ -466,6 +466,7 @@ ListPanel::ListPanel(Panel *parent, const char *panelName) : BaseClass(parent, p
 
 	m_pTextImage = new TextImage( "" );
 	m_pImagePanel = new ImagePanel(NULL, "ListImage");
+	m_pImagePanel->SetShouldScaleImage( true );
 	m_pImagePanel->SetAutoDelete(false);
 
 	m_iSortColumn = -1;
@@ -732,6 +733,16 @@ void ListPanel::SetColumnHeaderImage(int column, int imageListIndex)
 	Assert(m_pImageList);
 	m_ColumnsData[m_CurrentColumns[column]].m_pHeader->SetTextImageIndex(-1);
 	m_ColumnsData[m_CurrentColumns[column]].m_pHeader->SetImageAtIndex(0, m_pImageList->GetImage(imageListIndex), 0);
+}
+
+void vgui2::ListPanel::SetColumnHeaderImageBounds(int column, int index, int xpos, int width, int height)
+{
+	m_ColumnsData[m_CurrentColumns[column]].m_pHeader->SetImageBounds( index, xpos, width, height, true );
+}
+
+void vgui2::ListPanel::SetColumnHeaderImageOffset(int column, int index, int xpos, int ypos)
+{
+	m_ColumnsData[m_CurrentColumns[column]].m_pHeader->SetImageOffset( index, xpos, ypos );
 }
 
 //-----------------------------------------------------------------------------
@@ -1492,7 +1503,21 @@ Panel *ListPanel::GetCellRenderer(int itemID, int col)
 
 	if ( column.m_bTypeIsText ) 
 	{
+		vgui2::Label::TImageInfo imgInf = column.m_pHeader->GetImageData( 0 );
 		wchar_t tempText[ 256 ];
+
+		// If our header has this data, apply it here too.
+		if ( imgInf.override_width )
+		{
+			m_pLabel->SetImageBounds( 0, imgInf.offset, imgInf.width, imgInf.height, true );
+			m_pLabel->SetImageOffset( 0, imgInf.pos_offset_x, imgInf.pos_offset_y );
+		}
+		else
+		{
+			// m_pLabel is reused across cells; clear stale bounds from previous icon columns.
+			m_pLabel->SetImageBounds( 0, -1, -1, 0, false );
+			m_pLabel->SetImageOffset( 0, 0, 0 );
+		}
 
 		// Grab cell text
 		GetCellText( itemID, col, tempText, 256 );
@@ -1508,7 +1533,7 @@ Panel *ListPanel::GetCellRenderer(int itemID, int col)
 
 		m_pLabel->SetTextImageIndex( 0 );
 		m_pLabel->SetImageAtIndex(0, m_pTextImage, 3);
-			
+
 		bool selected = false;
 		if ( m_SelectedItems.HasElement(itemID) && ( !m_bCanSelectIndividualCells || col == m_iSelectedColumn ) )
 		{

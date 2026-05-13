@@ -658,6 +658,14 @@ public:
 		}
 	}
 
+	void SetImageSize( int w, int h )
+	{
+		if ( _enabled )
+			_enabled->SetSize(w, h);
+		if ( _disabled )
+			_disabled->SetSize(w, h);
+	}
+
 	virtual void ApplySchemeSettings(IScheme *pScheme)
 	{
 		BaseClass::ApplySchemeSettings(pScheme);

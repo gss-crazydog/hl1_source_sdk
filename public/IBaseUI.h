@@ -3,7 +3,7 @@
 
 #include "interface.h"
 
-struct cl_enginefunc_t;
+struct cl_enginefuncs_s;
 
 /**
 *	Interface to the engine's game UI controls.
@@ -23,7 +23,7 @@ public:
 	/**
 	*	Sets up the game UI.
 	*/
-	virtual void Start( cl_enginefunc_t* pEngfuncs, int iVersion ) = 0;
+	virtual void Start( struct cl_enginefuncs_s* pEngfuncs, int iVersion ) = 0;
 
 	/**
 	*	Shuts down the UI. Unloads libraries used by the UI.
