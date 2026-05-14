@@ -1213,12 +1213,8 @@ int Frame::GetBottomRightSize()
 
 int Frame::GetCaptionHeight()
 {
-	const int CAPTIONHEIGHT = 23;
-	if ( m_bSmallCaption )
-	{
-		return 12;
-	}
-	return CAPTIONHEIGHT;
+	int height = m_bSmallCaption ? 12 : 28;
+	return IsProportional() ? scheme()->GetProportionalScaledValue(height) : height;
 }
 
 //-----------------------------------------------------------------------------
@@ -1266,7 +1262,7 @@ void Frame::PerformLayout()
 	_menuButton->MoveToFront();
 	_minimizeButton->MoveToFront();
 	_minimizeToSysTrayButton->MoveToFront();
-	_menuButton->SetBounds(5+2, 5+3, GetCaptionHeight()-5, GetCaptionHeight()-5);
+	// _menuButton position moved down below so it can be scaled proportionally
 #endif
 
 	float scale = 1;
@@ -1286,12 +1282,19 @@ void Frame::PerformLayout()
 	int offset = offset_start;
 
 	int top_border_offset = (int) ( ( 5+3 ) * scale );
-	if ( m_bSmallCaption )
+	int side_border_offset = (int) ( 5 * scale );
+
+	if ( _menuButton )
 	{
-		top_border_offset = (int) ( ( 3 ) * scale );
+		int button_size = (int)( (m_bSmallCaption ? 7 : 17) * scale );
+		int image_size = (int)( (m_bSmallCaption ? 7 : 13) * scale ); 
+
+		_menuButton->SetBounds( side_border_offset + (int)( 2 * scale ), (int)( 9 * scale ), button_size, button_size );
+		_menuButton->SetImageSize( image_size, image_size );
+		_menuButton->SetImageOffset( 0, 2, 2 );
+		_menuButton->SetImageBounds( 0, 0, image_size, image_size, true );
 	}
 
-	int side_border_offset = (int) ( 5 * scale );
 	// push the buttons against the east side
 	if (_closeButton->IsVisible())
 	{
@@ -1615,21 +1618,26 @@ void Frame::PaintBackground()
 
 		// caption
 		surface()->DrawSetColor(titleColor);
-		int inset = m_bSmallCaption ? 3 : 5;
-		int captionHeight = m_bSmallCaption ? 14: 28;
+		int inset = IsProportional() ? scheme()->GetProportionalScaledValue(m_bSmallCaption ? 3 : 5) : (m_bSmallCaption ? 3 : 5);
+		int captionHeight = IsProportional() ? scheme()->GetProportionalScaledValue(m_bSmallCaption ? 14 : 28) : (m_bSmallCaption ? 14 : 28);
 
 		surface()->DrawFilledRect(inset, inset, wide - inset, captionHeight );
 		
 		if (_title)
 		{
 			int nTitleX = m_iTitleTextInsetXOverride ? m_iTitleTextInsetXOverride : m_iTitleTextInsetX;
+			if ( IsProportional() && !m_iTitleTextInsetXOverride )
+			{
+				nTitleX = scheme()->GetProportionalScaledValue( nTitleX );
+			}
+
 			int nTitleWidth = wide - 72;
 #if !defined( _X360 )
 			if ( _menuButton && _menuButton->IsVisible() )
 			{
 				int mw, mh;
 				_menuButton->GetImageSize( mw, mh );
-				nTitleX += mw;
+				nTitleX += mw + (IsProportional() ? scheme()->GetProportionalScaledValue(8) : 8);
 				nTitleWidth -= mw;
 			}
 #endif
@@ -1640,7 +1648,7 @@ void Frame::PaintBackground()
 			}
 			else
 			{
-				nTitleY = m_bSmallCaption ? 2 : 9;
+				nTitleY = IsProportional() ? scheme()->GetProportionalScaledValue(m_bSmallCaption ? 2 : 9) : (m_bSmallCaption ? 2 : 9);
 			}
 			_title->SetPos( nTitleX, nTitleY );		
 			_title->SetSize( nTitleWidth, tall);
