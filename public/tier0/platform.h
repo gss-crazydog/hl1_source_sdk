@@ -573,8 +573,14 @@ typedef void * HINSTANCE;
 #define _wtoi(arg) wcstol(arg, NULL, 10)
 #define _wtoi64(arg) wcstoll(arg, NULL, 10)
 
+#ifdef HMODULE
+#undef HMODULE
+#endif
 typedef uint32 HMODULE;
+
+#ifndef HANDLE
 typedef void *HANDLE;
+#endif
 #endif
 
 #ifndef WIN32
