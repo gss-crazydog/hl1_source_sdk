@@ -535,7 +535,15 @@ void ListPanel::SetImageList(ImageList *imageList, bool deleteImageListWhenDone)
 //-----------------------------------------------------------------------------
 void ListPanel::SetColumnHeaderHeight( int height )
 {
+	if (height < 1) 
+		height = 20;
+
 	m_iHeaderHeight = height;
+	for (int i = 0; i < m_CurrentColumns.Count(); i++)
+	{
+		m_ColumnsData[m_CurrentColumns[i]].m_pHeader->SetTall(height);
+	}
+	InvalidateLayout();
 }
 
 //-----------------------------------------------------------------------------
@@ -599,7 +607,7 @@ void ListPanel::AddColumnHeader(int index, const char *columnName, const char *c
 	// create the column header button
 	Button *pButton = SETUP_PANEL(new ColumnButton(this, columnName, columnText));  // the cell rendering mucks with the button visibility during the solvetraverse loop,
 																					//so force applyschemesettings to make sure its run
-	pButton->SetSize(width, 24);
+	pButton->SetSize(width, m_iHeaderHeight);
 	pButton->AddActionSignalTarget(this);
 	pButton->SetContentAlignment(Label::a_west);
 	pButton->SetTextInset(5, 0);
