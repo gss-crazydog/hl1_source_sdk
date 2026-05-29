@@ -554,11 +554,21 @@ void TextImage::GetTextSize(int &wide, int &tall)
 	{
 		wchar_t ch = text[i];
 
-		// handle stupid special characters, these should be removed
-		if ( ch == '&' )
-		{
-			continue;
-		}
+	// handle stupid special characters
+	if ( ch == '&' )
+	{
+			// If it's a double ampersand, count one and skip the other
+			if ( i + 1 < textLen && text[i + 1] == '&' )
+			{
+					i++; // skip the second ampersand so it doesn't trigger this block again
+					// Let the loop continue to measure the width of this single '&'
+			}
+			else
+			{
+					// It's a single shortcut ampersand, skip it entirely
+					continue;
+			}
+	}
 
 		if ( m_bAllCaps )
 		{
