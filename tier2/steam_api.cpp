@@ -19,10 +19,12 @@
 #include <libproc.h>
 #endif
 
+bool SteamAPI_IsAvailable();
+
 namespace
 {
 bool g_bIsInited = false;
-ISteamClient017 *g_pSteamClient017 = nullptr;
+ISteamClient *g_pSteamClient017 = nullptr;
 
 #ifdef SOURCE_SDK_MIN_STEAM_API
 typedef void (S_CALLTYPE *RegisterCallResultFn)(class CCallbackBase *pCallback, SteamAPICall_t hAPICall);
@@ -154,7 +156,7 @@ void LoadSteamClient017()
 	if (!factory)
 		return;
 
-	g_pSteamClient017 = (ISteamClient017 *)factory(STEAMCLIENT017_INTERFACE_VERSION, nullptr);
+	g_pSteamClient017 = (ISteamClient *)factory(STEAMCLIENT_INTERFACE_VERSION, nullptr);
 }
 }
 
@@ -185,7 +187,7 @@ void SteamAPI_InitForGoldSrc()
 //------------------------------------------------------------------
 // steam_api.h
 //------------------------------------------------------------------
-ISteamClient017 *SteamClient017()
+ISteamClient *SteamClient017()
 {
     return g_pSteamClient017;
 }
