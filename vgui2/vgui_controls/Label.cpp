@@ -1358,6 +1358,9 @@ void Label::PerformLayout()
 	{	
 		if ( m_bWrap || m_bCenterWrap )
 		{
+			// Set the draw width before measuring content so that
+			// RecalculateNewLinePositions wraps at the correct width.
+			_textImage->SetDrawWidth(wide);
 			int twide, ttall;
 			_textImage->GetContentSize(twide, ttall);
 			_textImage->SetSize(wide, ttall);
