@@ -45,6 +45,7 @@ public:
 	KeyValues *GetItemData(int itemID);
 	bool IsItemChecked(int itemID);
 	void SetItemCheckable(int itemID, bool state);
+	void SetItemFont(vgui2::HFont hFont);
 
 	/* MESSAGES SENT
 		"CheckButtonChecked" - sent when one of the check buttons state has changed
@@ -67,6 +68,7 @@ private:
 	};
 	CUtlVector<CheckItem_t> m_CheckItems;
 	vgui2::ScrollBar *m_pScrollBar;
+	vgui2::HFont m_hItemFont;
 };
 
 }

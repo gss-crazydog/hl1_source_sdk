@@ -7,6 +7,9 @@
 #include <vgui_controls/CheckButtonList.h>
 #include <vgui_controls/CheckButton.h>
 #include <vgui_controls/ScrollBar.h>
+#include <vgui/ISurface.h>
+#include <vgui/IScheme.h>
+#include <vgui_controls/Controls.h>
 #include <KeyValues.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -20,6 +23,7 @@ using namespace vgui2;
 CheckButtonList::CheckButtonList(Panel *parent, const char *name) : BaseClass(parent, name)
 {
 	m_pScrollBar = new ScrollBar(this, NULL, true);
+	m_hItemFont = INVALID_FONT;
 }
 
 //-----------------------------------------------------------------------------
@@ -42,8 +46,26 @@ int CheckButtonList::AddItem(const char *itemText, bool startsSelected, KeyValue
 	newItem.checkButton->SetSilentMode( false );
 	newItem.checkButton->AddActionSignalTarget(this);
 	newItem.userData = userData;
+	if ( m_hItemFont != INVALID_FONT )
+	{
+		newItem.checkButton->SetFont( m_hItemFont );
+	}
 	InvalidateLayout();
 	return m_CheckItems.AddToTail(newItem);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: sets the font used for item rows, so row height can track the font's
+//          actual size instead of a fixed pixel value
+//-----------------------------------------------------------------------------
+void CheckButtonList::SetItemFont(HFont hFont)
+{
+	m_hItemFont = hFont;
+	for (int i = 0; i < m_CheckItems.Count(); i++)
+	{
+		m_CheckItems[i].checkButton->SetFont(hFont);
+	}
+	InvalidateLayout();
 }
 
 //-----------------------------------------------------------------------------
@@ -87,8 +109,20 @@ void CheckButtonList::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
-	// get sizes
-	int x = 4, y = 4, wide = GetWide() - ((x * 2) + m_pScrollBar->GetWide()), tall = 22;
+	int x = IsProportional() ? scheme()->GetProportionalScaledValue(4) : 4;
+	int y = x;
+	int scrollBarWide = IsProportional() ? scheme()->GetProportionalScaledValue(19) : 19;
+	int tall;
+	if ( m_hItemFont != INVALID_FONT )
+	{
+		int fontPad = IsProportional() ? scheme()->GetProportionalScaledValue(8) : 8;
+		tall = surface()->GetFontTall(m_hItemFont) + fontPad;
+	}
+	else
+	{
+		tall = IsProportional() ? scheme()->GetProportionalScaledValue(22) : 22;
+	}
+	int wide = GetWide() - ((x * 2) + scrollBarWide);
 
 	// set scrollbar
 	int totalHeight = y + (m_CheckItems.Count() * tall);
@@ -97,7 +131,7 @@ void CheckButtonList::PerformLayout()
 		m_pScrollBar->SetRange(0, totalHeight + 1);
 		m_pScrollBar->SetRangeWindow(GetTall());
 		m_pScrollBar->SetVisible(true);
-		m_pScrollBar->SetBounds(GetWide() - 21, 0, 19, GetTall() - 2);
+		m_pScrollBar->SetBounds(GetWide() - scrollBarWide - x, 0, scrollBarWide, GetTall() - (x / 2));
 		SetPaintBorderEnabled(true);
 		y -= m_pScrollBar->GetValue();
 	}
