@@ -140,6 +140,10 @@ protected:
 	
 	MESSAGE_FUNC_INT( OnClickPanel, "ClickPanel", index);
 
+	// hover handling for clickable text (e.g. tooltips), mirrors the click handling above
+	MESSAGE_FUNC_INT( OnHoverPanel, "HoverPanel", index );
+	MESSAGE_FUNC( OnHoverPanelExit, "HoverPanelExit" );
+
 	virtual void OnCursorMoved(int x, int y);  // respond to moving the cursor with mouse button down
 	virtual void OnMousePressed(MouseCode code); // respond to mouse down events
 	virtual void OnMouseDoublePressed(MouseCode code);
@@ -156,6 +160,10 @@ protected:
 	// clickable url handling
 	int ParseTextStringForUrls(const char *text, int startPos, char *pchURLText, int cchURLText, char *pchURL, int cchURL, bool &clickable);
 	virtual void OnTextClicked(const wchar_t *text);
+
+	// called when the cursor hovers over (or leaves) a span of clickable text; used by e.g. tooltips
+	virtual void OnTextHovered(const wchar_t *text) {}
+	virtual void OnTextUnhovered() {}
 
 #ifdef DBGFLAG_VALIDATE
 	virtual void Validate( CValidator &validator, char *pchName );

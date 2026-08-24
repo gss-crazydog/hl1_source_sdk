@@ -48,6 +48,7 @@ public:
 		
 		SetPaintBackgroundEnabled(false);
 		SetPaintEnabled(false);
+		SetMouseInputEnabled(true);
 //		SetPaintAppearanceEnabled(false);
 
 #if defined( DRAW_CLICK_PANELS )
@@ -89,6 +90,16 @@ public:
 		{
 			GetParent()->OnMousePressed( code );
 		}
+	}
+
+	void OnCursorEntered()
+	{
+		PostActionSignal(new KeyValues("HoverPanel", "index", _textIndex));
+	}
+
+	void OnCursorExited()
+	{
+		PostActionSignal(new KeyValues("HoverPanelExit"));
 	}
 
 private:
@@ -2403,6 +2414,48 @@ void RichText::OnClickPanel(int index)
 
 	PostActionSignal(new KeyValues("TextClicked", "text", wBuf));
 	OnTextClicked(wBuf);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when the cursor has entered a span of clickable text
+//-----------------------------------------------------------------------------
+void RichText::OnHoverPanel(int index)
+{
+	wchar_t wBuf[512];
+	int outIndex = 0;
+
+	// parse out the clickable text, same as OnClickPanel
+	_currentTextClickable = true;
+	TRenderState renderState;
+	GenerateRenderStateForTextStreamIndex(index, renderState);
+	for (int i = index; i < (sizeof(wBuf) - 1) && i < m_TextStream.Count(); i++)
+	{
+		// stop getting characters when text is no longer clickable
+		UpdateRenderState(i, renderState);
+		if (!renderState.textClickable)
+			break;
+
+		// copy out the character
+		wBuf[outIndex++] = m_TextStream[i];
+	}
+
+	wBuf[outIndex] = 0;
+
+	int iFormatSteam = FindFormatStreamIndexForTextStreamPos( index );
+	if ( m_FormatStream[iFormatSteam].m_sClickableTextAction )
+	{
+		Q_UTF8ToUnicode( m_FormatStream[iFormatSteam].m_sClickableTextAction.String(), wBuf, sizeof( wBuf ) );
+	}
+
+	OnTextHovered(wBuf);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when the cursor has left a span of clickable text
+//-----------------------------------------------------------------------------
+void RichText::OnHoverPanelExit()
+{
+	OnTextUnhovered();
 }
 
 //-----------------------------------------------------------------------------
