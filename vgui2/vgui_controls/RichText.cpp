@@ -718,7 +718,7 @@ int RichText::DrawString(int iFirst, int iLast, TRenderState &renderState, HFont
 //-----------------------------------------------------------------------------
 // Purpose: Finish drawing url
 //-----------------------------------------------------------------------------
-void RichText::FinishingURL(int x, int y)
+void RichText::FinishingURL(int x, int y, Color color, HFont font)
 {
 	// finishing URL
 	if ( _clickableTextPanels.IsValidIndex( _clickableTextIndex ) )
@@ -736,6 +736,26 @@ void RichText::FinishingURL(int x, int y)
 		{
 			--_clickableTextIndex;
 			clickPanel->SetVisible(false);
+		}
+		else
+		{
+			int underscoreWide = max( 1, surface()->GetCharacterWidth( font, '_' ) );
+			int numUnderscores = ( x - px + underscoreWide - 1 ) / underscoreWide;
+			if ( numUnderscores > 256 )
+				numUnderscores = 256;
+
+			if ( numUnderscores > 0 )
+			{
+				wchar_t underscores[257];
+				for ( int u = 0; u < numUnderscores; u++ )
+					underscores[u] = L'_';
+				underscores[numUnderscores] = L'\0';
+
+				surface()->DrawSetTextFont( font );
+				surface()->DrawSetTextColor( color );
+				surface()->DrawSetTextPos( px, py );
+				surface()->DrawPrintText( underscores, numUnderscores );
+			}
 		}
 	}
 }
@@ -829,6 +849,7 @@ void RichText::Paint()
 		// this has to happen if it's our very first iteration, or if we are actually changing
 		// state.
 		int nXBeforeStateChange = renderState.x;
+		Color colorBeforeStateChange = renderState.textColor;
 		if ( UpdateRenderState(i, renderState) || i == startIndex )
 		{
 			// check for url state change
@@ -851,7 +872,7 @@ void RichText::Paint()
 				}
 				else
 				{
-					FinishingURL(nXBeforeStateChange, renderState.y);
+					FinishingURL(nXBeforeStateChange, renderState.y, colorBeforeStateChange, hFontCurrent);
 					hFontCurrent = _font;
 					surface()->DrawSetTextFont( hFontCurrent );
 				}
@@ -865,7 +886,7 @@ void RichText::Paint()
 		{
 			if (_currentTextClickable)
 			{
-				FinishingURL(renderState.x, renderState.y);
+				FinishingURL(renderState.x, renderState.y, renderState.textColor, hFontCurrent);
 			}
 			
 			// add another line
@@ -945,7 +966,7 @@ void RichText::Paint()
 
 	if (renderState.textClickable)
 	{
-		FinishingURL(renderState.x, renderState.y);
+		FinishingURL(renderState.x, renderState.y, renderState.textColor, hFontCurrent);
 	}
 }
 

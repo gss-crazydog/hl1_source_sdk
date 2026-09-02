@@ -191,7 +191,7 @@ private:
 
 	void LayoutVerticalScrollBarSlider();
 	void OpenEditMenu();
-	void FinishingURL(int x, int y);
+	void FinishingURL(int x, int y, Color color, HFont font);
 	// Returns the character index the drawing should Start at
 	int GetStartDrawIndex(int &lineBreakIndexIndex);
 	int GetCursorLine();
