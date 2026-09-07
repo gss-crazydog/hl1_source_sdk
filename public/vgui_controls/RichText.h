@@ -79,6 +79,7 @@ public:
 	void InsertClickableTextEnd();
 	// inserts a string that needs to be scanned for urls/mailto commands to be made clickable
 	void InsertPossibleURLString(const char *text, Color URLTextColor, Color normalTextColor);
+	const char *GetClickableTextActionAtPos( int cx, int cy );
 
 	void InsertFade( float flSustain, float flLength );
 

@@ -610,6 +610,34 @@ int RichText::PixelToCursorSpace(int cx, int cy)
 	return i;
 }
 
+const char *RichText::GetClickableTextActionAtPos(int cx, int cy)
+{
+	if (cx < 0 || cy < 0 || cx >= GetWide() || cy >= GetTall())
+		return NULL;
+
+	int index = PixelToCursorSpace(cx, cy);
+	if (!m_TextStream.IsValidIndex(index))
+		return NULL;
+
+	TRenderState renderState;
+	GenerateRenderStateForTextStreamIndex(index, renderState);
+	if (!renderState.textClickable)
+		return NULL;
+
+	CalculateFade(renderState);
+	if (renderState.textColor.a() == 0)
+		return NULL;
+
+	int iFormatStreamIndex = FindFormatStreamIndexForTextStreamPos(index);
+	if (!m_FormatStream.IsValidIndex(iFormatStreamIndex))
+		return NULL;
+
+	if (!m_FormatStream[iFormatStreamIndex].m_sClickableTextAction)
+		return NULL;
+
+	return m_FormatStream[iFormatStreamIndex].m_sClickableTextAction.String();
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Draws a string of characters in the panel
 // Input:	iFirst - Index of the first character to draw
