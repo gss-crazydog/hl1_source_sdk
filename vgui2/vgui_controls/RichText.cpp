@@ -768,7 +768,7 @@ void RichText::FinishingURL(int x, int y, Color color, HFont font)
 		else
 		{
 			int underscoreWide = max( 1, surface()->GetCharacterWidth( font, '_' ) );
-			int numUnderscores = ( x - px + underscoreWide - 1 ) / underscoreWide;
+			int numUnderscores = max( 1, ( x - px ) / underscoreWide );
 			if ( numUnderscores > 256 )
 				numUnderscores = 256;
 
