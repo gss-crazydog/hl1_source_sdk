@@ -6275,9 +6275,12 @@ public:
 			currentId = DrawGetTextureId( texturename );
 			if ( currentId == -1 )
 			{
+				// Only load a texture the first time its name is seen. Every panel has these (the corner
+				// textures), so reloading per panel meant thousands of file searches per screen, and a missing
+				// file was searched for through every search path again each time.
 				currentId = surface()->CreateNewTextureID();
+				DrawSetTextureFile( currentId, texturename, false, true );
 			}
-			DrawSetTextureFile( currentId, texturename, false, true );
 		}
 
 		*(int *)data = currentId;
@@ -6295,9 +6298,10 @@ public:
 			currentId = DrawGetTextureId( texturename );
 			if ( currentId == -1 )
 			{
+				// See SetData: load once per texture name, not once per panel
 				currentId = surface()->CreateNewTextureID();
+				DrawSetTextureFile( currentId, texturename, false, true );
 			}
-			DrawSetTextureFile( currentId, texturename, false, true );
 		}
 
 		*(int *)data = currentId;
