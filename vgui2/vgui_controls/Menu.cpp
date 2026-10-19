@@ -6,6 +6,7 @@
 //=============================================================================//
 
 #include "vgui_controls/pch_vgui_controls.h"
+#include <wctype.h>
 
 // memdbgon must be the last include file in a .cpp file
 #include "tier0/memdbgon.h"
@@ -1490,9 +1491,15 @@ void Menu::OnTypeAhead(wchar_t unichar)
 		wchar_t menuItemName[255];
 		m_MenuItems[i]->GetText(menuItemName, 254);
 
-		// This is supposed to be case insensitive but we don't have a portable case
-		// insensitive wide-character routine.
-		if ( wcsncmp( m_szTypeAheadBuf, menuItemName, m_iNumTypeAheadChars) == 0 )			
+		// Case insensitive, so typing "a" finds "Arctic"
+		int nMatched = 0;
+		while ( nMatched < m_iNumTypeAheadChars && menuItemName[nMatched] &&
+			towlower( m_szTypeAheadBuf[nMatched] ) == towlower( menuItemName[nMatched] ) )
+		{
+			nMatched++;
+		}
+
+		if ( nMatched == m_iNumTypeAheadChars )
 		{
 			itemToSelect = i;
 			break;			

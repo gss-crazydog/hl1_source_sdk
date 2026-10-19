@@ -962,6 +962,10 @@ void ComboBox::SelectMenuItem(int itemToSelect)
 
 		int menuID = m_pDropDown->GetMenuID(itemToSelect);
 		m_pDropDown->GetMenuItem(menuID)->GetText(menuItemName, 254);
+
+		// Make the item active before TextChanged is posted, so GetActiveItem() in a handler returns the new row
+		// and not the one last picked with the mouse
+		m_pDropDown->SilentActivateItem(menuID);
 		OnSetText(menuItemName);
 		SelectAllText(false);		
 	}
