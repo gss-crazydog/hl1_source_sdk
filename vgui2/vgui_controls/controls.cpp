@@ -68,7 +68,13 @@ public:
 	virtual int GetProportionalScaledValue(int normalizedValue)
 	{
 		// Custom implementation to allow custom proportional base.
-		return (int)(normalizedValue * GetProportionalScale());
+		const int scaledValue = (int)(normalizedValue * GetProportionalScale());
+
+		// Below the base height a 1 truncates to 0, and a 1 px line or border would not be drawn at all
+		if (scaledValue == 0 && normalizedValue != 0)
+			return normalizedValue > 0 ? 1 : -1;
+
+		return scaledValue;
 	}
 
 	virtual int GetProportionalNormalizedValue(int scaledValue)
