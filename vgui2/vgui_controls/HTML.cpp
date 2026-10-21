@@ -1402,6 +1402,9 @@ void HTML::BrowserOpenNewTab( HTML_OpenLinkInNewTab_t *pCmd )
 void HTML::BrowserPopupHTMLWindow( HTML_NewWindow_t *pCmd )
 {
 	CHECK_BROWSER_HANDLE( pCmd );
+	if ( OnPopupHTMLWindow( pCmd->pchURL ) )
+		return;
+
 	HTMLPopup *p = new HTMLPopup( this, pCmd->pchURL, "" );
 	int wide = pCmd->unWide;
 	int tall = pCmd->unTall;

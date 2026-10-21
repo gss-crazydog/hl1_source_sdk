@@ -60,6 +60,8 @@ public:
 	virtual void OnSetHTMLTitle( const char *pchTitle ) {}
 	virtual void OnLinkAtPosition( const char *pchURL ) {}
 	virtual void OnURLChanged( const char *url, const char *pchPostData, bool bIsRedirect ) {}
+	// True when the pop-up was handled, which keeps it from opening in a new HTML window
+	virtual bool OnPopupHTMLWindow( const char *pchURL ) { return false; }
 
 	virtual bool OnOpenNewTab( const char *pchURL, bool bForeground ) { return false; }
 
