@@ -28,6 +28,9 @@ using namespace vgui2;
 
 #define HL1_USER_AGENT "GoldSrc"
 
+// Steam sends the callbacks of every browser in the process to every HTML panel, each one only handles its own
+#define CHECK_BROWSER_HANDLE( pCmd ) do { if ( ( pCmd )->unBrowserHandle != m_unBrowserHandle ) return; } while ( 0 )
+
 //-----------------------------------------------------------------------------
 // Purpose: A simple passthrough panel to render the border onto the HTML widget
 //-----------------------------------------------------------------------------
@@ -1235,6 +1238,7 @@ void HTML::CHTMLFindBar::OnCommand( const char *pchCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserNeedsPaint( HTML_NeedsPaint_t *pCallback )
 {
+	CHECK_BROWSER_HANDLE( pCallback );
 	int tw = 0, tt = 0;
 	if ( m_iHTMLTextureID != 0 )
 	{
@@ -1338,6 +1342,7 @@ bool HTML::OnStartRequest( const char *url, const char *target, const char *pchP
 //-----------------------------------------------------------------------------
 void HTML::BrowserStartRequest( HTML_StartRequest_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	bool bRes = OnStartRequest( pCmd->pchURL, pCmd->pchTarget, pCmd->pchPostData, pCmd->bIsRedirect );
 
 	if (m_SteamAPIContext.SteamHTMLSurface())
@@ -1350,6 +1355,7 @@ void HTML::BrowserStartRequest( HTML_StartRequest_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserURLChanged( HTML_URLChanged_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	m_sCurrentURL = pCmd->pchURL;
 
 	KeyValues *pMessage = new KeyValues( "OnURLChanged" );
@@ -1368,6 +1374,7 @@ void HTML::BrowserURLChanged( HTML_URLChanged_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserFinishedRequest( HTML_FinishedRequest_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	PostActionSignal( new KeyValues( "OnFinishRequest", "url", pCmd->pchURL ) );
 	if (  pCmd->pchPageTitle && pCmd->pchPageTitle[0] )
 		PostActionSignal( new KeyValues( "PageTitleChange", "title", pCmd->pchPageTitle ) );
@@ -1384,6 +1391,7 @@ void HTML::BrowserFinishedRequest( HTML_FinishedRequest_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserOpenNewTab( HTML_OpenLinkInNewTab_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	(pCmd);
 	// Not suppored by default, if a child class overrides us and knows how to handle tabs, then it can do this.
 }
@@ -1393,6 +1401,7 @@ void HTML::BrowserOpenNewTab( HTML_OpenLinkInNewTab_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserPopupHTMLWindow( HTML_NewWindow_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	HTMLPopup *p = new HTMLPopup( this, pCmd->pchURL, "" );
 	int wide = pCmd->unWide;
 	int tall = pCmd->unTall;
@@ -1416,6 +1425,7 @@ void HTML::BrowserPopupHTMLWindow( HTML_NewWindow_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSetHTMLTitle( HTML_ChangedTitle_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	PostMessage( GetParent(), new KeyValues( "OnSetHTMLTitle", "title", pCmd->pchTitle ) );
 	OnSetHTMLTitle( pCmd->pchTitle );
 }
@@ -1426,6 +1436,7 @@ void HTML::BrowserSetHTMLTitle( HTML_ChangedTitle_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserStatusText( HTML_StatusText_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	PostActionSignal( new KeyValues( "OnSetStatusText", "status", pCmd->pchMsg ) );
 }
 
@@ -1435,6 +1446,7 @@ void HTML::BrowserStatusText( HTML_StatusText_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSetCursor( HTML_SetCursor_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	vgui2::CursorCode cursor = dc_last;
 
 	switch ( pCmd->eMouseCursor )
@@ -1579,6 +1591,7 @@ void HTML::BrowserSetCursor( HTML_SetCursor_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserFileLoadDialog( HTML_FileOpenDialog_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	// couldn't access an OS-specific dialog, use the internal one
 	if ( m_hFileOpenDialog.Get() )
 	{
@@ -1598,6 +1611,7 @@ void HTML::BrowserFileLoadDialog( HTML_FileOpenDialog_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserShowToolTip( HTML_ShowToolTip_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 /*	
 	BR FIXME
 	Tooltip *tip = GetTooltip();
@@ -1616,6 +1630,7 @@ void HTML::BrowserShowToolTip( HTML_ShowToolTip_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserUpdateToolTip( HTML_UpdateToolTip_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 //	GetTooltip()->SetText( pCmd->text().c_str() );
 }
 
@@ -1625,6 +1640,7 @@ void HTML::BrowserUpdateToolTip( HTML_UpdateToolTip_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserHideToolTip( HTML_HideToolTip_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 //	GetTooltip()->HideTooltip();
 //	DeleteToolTip();
 }
@@ -1635,6 +1651,7 @@ void HTML::BrowserHideToolTip( HTML_HideToolTip_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserSearchResults( HTML_SearchResults_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	if ( pCmd->unResults == 0 )
 		m_pFindBar->HideCountLabel();
 	else
@@ -1653,6 +1670,7 @@ void HTML::BrowserSearchResults( HTML_SearchResults_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserClose( HTML_CloseBrowser_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	PostActionSignal( new KeyValues( "OnCloseWindow" ) );
 }
 
@@ -1662,6 +1680,7 @@ void HTML::BrowserClose( HTML_CloseBrowser_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserHorizontalScrollBarSizeResponse( HTML_HorizontalScroll_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	ScrollData_t scrollHorizontal;
 	scrollHorizontal.m_nScroll = pCmd->unScrollCurrent;
 	scrollHorizontal.m_nMax = pCmd->unScrollMax;
@@ -1684,6 +1703,7 @@ void HTML::BrowserHorizontalScrollBarSizeResponse( HTML_HorizontalScroll_t *pCmd
 //-----------------------------------------------------------------------------
 void HTML::BrowserVerticalScrollBarSizeResponse( HTML_VerticalScroll_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	ScrollData_t scrollVertical;
 	scrollVertical.m_nScroll = pCmd->unScrollCurrent;
 	scrollVertical.m_nMax = pCmd->unScrollMax;
@@ -1706,6 +1726,7 @@ void HTML::BrowserVerticalScrollBarSizeResponse( HTML_VerticalScroll_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserLinkAtPositionResponse( HTML_LinkAtPosition_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	m_LinkAtPos.m_sURL = pCmd->pchURL;
 	m_LinkAtPos.m_nX = pCmd->x;
 	m_LinkAtPos.m_nY = pCmd->y;
@@ -1740,6 +1761,7 @@ void HTML::BrowserLinkAtPositionResponse( HTML_LinkAtPosition_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSAlert( HTML_JSAlert_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	MessageBox *pDlg = new MessageBox( m_sCurrentURL, (const char *)pCmd->pchMessage, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetCommand( new KeyValues( "DismissJSDialog", "result", false ) );
@@ -1752,6 +1774,7 @@ void HTML::BrowserJSAlert( HTML_JSAlert_t *pCmd )
 //-----------------------------------------------------------------------------
 void HTML::BrowserJSConfirm( HTML_JSConfirm_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	QueryBox *pDlg = new QueryBox( m_sCurrentURL, (const char *)pCmd->pchMessage, this );
 	pDlg->AddActionSignalTarget( this );
 	pDlg->SetOKCommand( new KeyValues( "DismissJSDialog", "result", true ) );
@@ -1775,6 +1798,7 @@ void HTML::DismissJSDialog( int bResult )
 //-----------------------------------------------------------------------------
 void HTML::BrowserCanGoBackandForward( HTML_CanGoBackAndForward_t *pCmd )
 {
+	CHECK_BROWSER_HANDLE( pCmd );
 	m_bCanGoBack = pCmd->bCanGoBack;
 	m_bCanGoForward = pCmd->bCanGoForward;
 }
